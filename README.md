@@ -7,14 +7,14 @@ We trained an image classification model using [Google Teachable Machine](https:
 
 Watch the model training process below:
 
-https://github.com/AdithanaDharma/RPS_Computer-Vision-/raw/main/Train.mp4
+https://github.com/user-attachments/assets/579da093-e6fb-4505-b4b1-f58530149400
 
 *(If the video above doesn't load, you can also [download/view it here](./Train.mp4))*
 
 ## 🎮 Application Demo
 Here is a demonstration of the application in action, showing the real-time gesture recognition and gameplay against the computer:
 
-https://github.com/AdithanaDharma/RPS_Computer-Vision-/raw/main/Demo.mp4
+https://github.com/user-attachments/assets/b519b5e7-5ad7-46fc-a3d0-0e37a1199d74
 
 *(If the video above doesn't load, you can also [download/view it here](./Demo.mp4))*
 

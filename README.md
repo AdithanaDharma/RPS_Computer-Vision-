@@ -1,76 +1,42 @@
-# Rock, Paper, Scissors
+# Rock, Paper, Scissors with Computer Vision
 
-This application is a rock, paper, scissors game where the user plays against the computer. The computer makes its choice randomly, and the winner is determined based on the traditional rules of the game.
+A Java-based Rock, Paper, Scissors game where the user plays against the computer using a webcam. The game leverages a custom machine learning model trained via Google Teachable Machine to recognize user hand gestures (Rock, Paper, or Scissors) in real-time.
 
-## 🔎 Existing Code
+## 🧠 Model Training Process
+We trained an image classification model using [Google Teachable Machine](https://teachablemachine.withgoogle.com/). The model was trained to recognize three distinct classes: Rock, Paper, and Scissors based on hand gestures. 
 
-### RockPaperScissors.java
+Watch the model training process below:
 
-The `RockPaperScissors` class orchestrates the game's flow, providing the framework for executing the game's logic, managing the camera and model interactions, and controlling the scene transitions. It incorporates the main game view, the end game view, and transitions between them based on the game's outcome.
+<video src="https://github.com/AdithanaDharma/RPS_Computer-Vision-/raw/main/Train.mp4" controls="controls" width="100%">
+</video>
 
-**Suggested Modifications and New Features:**
+*(If the video above doesn't load, you can also [download/view it here](./Train.mp4))*
 
-* Introduce multiple rounds within a game session, tallying scores before declaring a final winner.
+## 🎮 Application Demo
+Here is a demonstration of the application in action, showing the real-time gesture recognition and gameplay against the computer:
 
-### MainScene.java
+<video src="https://github.com/AdithanaDharma/RPS_Computer-Vision-/raw/main/Demo.mp4" controls="controls" width="100%">
+</video>
 
-The `MainScene` class manages the main interface where the game of Roc, Paper, Scissors is played. It displays the camera feed, the app's title, the computer's choice, the user's predicted gesture, and the corresponding confidence score. This class also provides feedback to the user in the form of text labels, spacers, and a loading animation during camera initialization.
+*(If the video above doesn't load, you can also [download/view it here](./Demo.mp4))*
 
-**Suggested Modifications and New Features:**
+## 💻 Code Explanation
 
-* Add a countdown before capturing the user's gesture to give the user some time to prepare.
-* Incorporate audio cues or background music to enhance the user experience.
+The application follows a modular architecture separating the user interface, game logic, and model inference.
 
-### GameOverScene.java
+### Core Components
 
-The `GameOverScene` class manages the game-over screen's interface and interactions. It presents the result of the game, allows the user to play again or exit the application, and manages the app's shutdown.
+1. **`RockPaperScissors.java`**
+   The main driver class that orchestrates the overall application flow. It sets up the primary window (stage), manages the transitions between different scenes (Main Scene vs Game Over Scene), starts the camera capture, and initializes the machine learning model.
 
-**Suggested Modifications and New Features:**
+2. **`MainScene.java`**
+   Handles the primary gameplay UI. It displays the live camera feed, real-time predictions, confidence scores, and instructions. It captures frames from the webcam and continuously sends them to the model for prediction. It implements stabilization logic so that a gesture is only confirmed if the model predicts the same gesture with high confidence continuously over a designated period.
 
-* Enhance the display by showing statistics like the number of games won, lost, or tied.
-* Add sound effects or background music to enhance the user experience.
+3. **`GameLogic.java`**
+   Contains the core rules of Rock, Paper, Scissors. It generates a random choice for the computer, compares it against the user's predicted gesture, and evaluates the winner based on the traditional game rules.
 
-### Loading.java
+4. **`ModelProcessor.java`**
+   Responsible for interfacing with the exported Teachable Machine model. It processes incoming image frames from the webcam, runs them through the loaded model, and returns the predicted class along with its probability/confidence score.
 
-The `Loading` class manages the loading animations and labels shown during camera initialization or data processing.
-
-**Suggested Modifications and New Features:**
-
-* Introduce different loading animations for variety.
-* Display a loading percentage or estimated time remaining.
-* Implement a retry or cancel mechanism for prolonged loading times.
-
-## ✅ TO DO: GameLogic.java
-
-The `GameLogic` class provides a framework for managing the logic of a Rock, Paper, Scissors game, such as determining the winner, handling game state, and generating computer choices.
-
-Implement the following methods in `GameLogic.java` to incorporate your Teachable Machine model in the app.
-
-`getComputerChoice()`
-
-* Randomly select one of the three options: "rock", "paper", or "scissors" for the computer player.
-* Return the randomly chosen string.
-
-`determineWinner(String predictedClass, String computerChoice)`
-
-* Based on the user's predicted gesture (`predictedClass`) and the computer's random choice (`computerChoice`), decide the outcome of the game round.
-* Consider all combinations (rock vs paper, rock vs scissors, etc.) and use the game rules to determine the winner.
-* Return a string that combines both choices and specifies the round's outcome.
-
-`getTieResult()`
-
-* Implement functionality to handle a tie result. This method is triggered when both the user and the computer make the same choice.
-* Set the `gameOver` flag to `true`.
-* Return an appropriate string indicating the game has tied.
-
-`getUserWinnerResult()`
-
-* Implement functionality to handle when the user wins.
-* Set the `gameOver` flag to `true`.
-* Return a string indicating that the user has won the game.
-
-`getComputerWinnerResult()`
-
-* Implement functionality to handle when the computer wins.
-* Set the `gameOver` flag to `true`.
-* Return a string indicating that the computer has won the game.
+5. **`GameOverScene.java`**
+   Manages the end-of-game UI. It displays the final result (Win, Lose, or Tie) along with the choices made by both the player and the computer, offering options to either play again or gracefully exit the application.

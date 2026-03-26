@@ -45,8 +45,8 @@ public class GameOverScene {
         // Add the label and buttons to the layout
         layout.getChildren().addAll(winnerLabel, playAgainButton, exitButton);
 
-        // Create the scene with the layout
-        Scene gameOverScene = new Scene(layout, 600, 750);
+        // Create the scene with the layout, maintaining the mobile ratio
+        Scene gameOverScene = new Scene(layout, 450, 800);
         gameOverScene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
 
         // Return the scene

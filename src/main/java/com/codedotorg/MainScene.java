@@ -12,7 +12,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 public class MainScene {
-    
+
     /** The root layout of the main scene */
     private VBox rootLayout;
 
@@ -31,6 +31,9 @@ public class MainScene {
     /** Displays a prompt to tell the user to make a choice */
     private Label promptLabel;
 
+    /** Button to indicate the user is ready to play */
+    private Button readyButton;
+
     /** Button to exit the app */
     private Button exitButton;
 
@@ -42,7 +45,8 @@ public class MainScene {
 
     /**
      * Constructs a new MainScene object.
-     * Initializes the cameraView, progress, exitButton, titleLabel, computerChoiceLabel,
+     * Initializes the cameraView, progress, exitButton, titleLabel,
+     * computerChoiceLabel,
      * predictionLabel, promptLabel, cameraLoadingLabel, and firstCapture.
      */
     public MainScene() {
@@ -50,16 +54,23 @@ public class MainScene {
         cameraView.setId("camera");
 
         exitButton = new Button("Exit");
-        
+
         titleLabel = new Label("Rock, Paper, Scissors");
         titleLabel.setId("titleLabel");
 
         computerChoiceLabel = new Label("");
-        predictionLabel = new Label("");
-        promptLabel = new Label("Make your choice!");
+        computerChoiceLabel.setId("computerChoiceLabel");
 
-        cameraLoading = new Loading();  
-        firstCapture = true; 
+        predictionLabel = new Label("");
+        predictionLabel.setId("predictionLabel");
+
+        promptLabel = new Label("Make your choice!");
+        promptLabel.setId("promptLabel");
+
+        readyButton = new Button("Ready");
+
+        cameraLoading = new Loading();
+        firstCapture = true;
     }
 
     /**
@@ -69,6 +80,24 @@ public class MainScene {
      */
     public ImageView getCameraView() {
         return cameraView;
+    }
+
+    /**
+     * Returns the ready button.
+     * 
+     * @return the ready button
+     */
+    public Button getReadyButton() {
+        return readyButton;
+    }
+
+    /**
+     * Returns the prompt label.
+     * 
+     * @return the prompt label
+     */
+    public Label getPromptLabel() {
+        return promptLabel;
     }
 
     /**
@@ -92,6 +121,12 @@ public class MainScene {
         // Initialize the root layout
         rootLayout = new VBox();
         rootLayout.setAlignment(Pos.CENTER);
+        rootLayout.setSpacing(15);
+        rootLayout.setPadding(new javafx.geometry.Insets(25));
+
+        // Make the camera view responsive to follow the viewport
+        cameraView.fitWidthProperty().bind(rootLayout.widthProperty().subtract(50));
+        cameraView.setPreserveRatio(true);
 
         // Create spacers for above and below the cameraView
         Region cameraSpacer1 = createSpacer(20);
@@ -100,9 +135,11 @@ public class MainScene {
         // Create spacer for above the exit button
         Region buttonSpacer = createSpacer(10);
 
-        // Add the title label, prompt label, loading animation, camera view, prediction label, and exit button to the layout
+        // Add the title label, prompt label, loading animation, camera view, prediction
+        // label, readyButton, and exit button to the layout
         rootLayout.getChildren().addAll(titleLabel, promptLabel, cameraLoading.getCameraLoadingLabel(),
-            cameraSpacer1, cameraView, cameraSpacer2, cameraLoading.getProgressIndicator(), computerChoiceLabel, predictionLabel, buttonSpacer, exitButton);
+                cameraSpacer1, cameraView, cameraSpacer2, cameraLoading.getProgressIndicator(), computerChoiceLabel,
+                predictionLabel, buttonSpacer, readyButton, exitButton);
 
         if (!isFirstCapture()) {
             cameraLoading.hideLoadingAnimation(rootLayout, cameraView);
@@ -111,8 +148,8 @@ public class MainScene {
             setFirstCaptureFalse();
         }
 
-        // Creates a new scene and set the layout as its root
-        Scene mainScene = new Scene(rootLayout, 600, 750);
+        // Creates a new scene matching a 9:16 mobile aspect ratio
+        Scene mainScene = new Scene(rootLayout, 450, 800);
         mainScene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
 
         // Returns the main scene
@@ -127,7 +164,7 @@ public class MainScene {
     public boolean isFirstCapture() {
         return firstCapture;
     }
-    
+
     /**
      * Sets the boolean value of firstCapture to false.
      */
@@ -155,12 +192,12 @@ public class MainScene {
     public void showUserResponse(String predictedClass, double predictedScore) {
         // Hide the loading animation
         cameraLoading.hideLoadingAnimation(rootLayout, cameraView);
-        
+
         // Get the predicted class without the leading number
         String user = predictedClass.substring(predictedClass.indexOf(" ") + 1);
 
         // Convert the predicted score to an integer percentage
-        int percentage = (int)(predictedScore * 100);
+        int percentage = (int) (predictedScore * 100);
 
         // Create a String with the predicted class and confidence score
         String userResult = "User: " + user + " (" + percentage + "% Confidence)";
@@ -180,5 +217,5 @@ public class MainScene {
         temp.setPrefHeight(amount);
         return temp;
     }
-    
+
 }

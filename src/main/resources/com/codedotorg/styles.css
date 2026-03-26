@@ -1,26 +1,55 @@
 .label {
+    font-size: 20px;
     -fx-font-size: 20px;
 }
 
 .vbox {
+    background-color: #f0f0f0;
     -fx-background-color: #f0f0f0;
 }
 
 #titleLabel {
+    font-size: 30px;
     -fx-font-size: 30px;
+    color: #009EB0;
     -fx-text-fill: #009EB0;
+    font-weight: bold;
     -fx-font-weight: bold;
 }
 
 .button {
+    background-color: #009EB0;
     -fx-background-color: #009EB0;
+    font-size: 20px;
     -fx-font-size: 20px;
+    color: white;
     -fx-text-fill: white;
+    font-weight: bold;
     -fx-font-weight: bold;
+    min-width: 100px;
     -fx-min-width: 100px;
+    min-height: 50px;
     -fx-min-height: 50px;
 }
 
 #loading {
     -fx-progress-color: #009EB0;
+}
+
+#promptLabel {
+    font-size: 24px;
+    -fx-font-size: 24px;
+    color: #e65100;
+    -fx-text-fill: #e65100;
+    font-weight: bold;
+    -fx-font-weight: bold;
+}
+
+#predictionLabel, #computerChoiceLabel {
+    font-size: 22px;
+    -fx-font-size: 22px;
+    color: #424242;
+    -fx-text-fill: #424242;
+    font-weight: bold;
+    -fx-font-weight: bold;
 }

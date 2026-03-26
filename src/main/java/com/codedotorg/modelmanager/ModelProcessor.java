@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,30 +21,38 @@ public class ModelProcessor {
     /** The path to the directory containing the model */
     private static final String MODEL_PATH = "src\\main\\java\\com\\codedotorg\\model\\";
 
-    /** The path to the labels.txt file (should be in the root of the model directory) */
+    /**
+     * The path to the labels.txt file (should be in the root of the model
+     * directory)
+     */
     private static final String LABELS_PATH = MODEL_PATH + "labels.txt";
 
     /** Represents the TensorFlow model and its associated variables */
     private SavedModelBundle bundle;
 
-    /** Represents a TensorFlow session, which is used to run the model and make predictions */
+    /**
+     * Represents a TensorFlow session, which is used to run the model and make
+     * predictions
+     */
     private Session session;
 
     /** The list of class labels for the model */
     private List<String> labels;
 
     /**
-     * Constructs a new ModelProcessor object with null values for bundle and session.
+     * Constructs a new ModelProcessor object with null values for bundle and
+     * session.
      */
     public ModelProcessor() {
         bundle = null;
         session = null;
     }
-    
+
     /**
      * Loads a saved model from the specified path and creates a session.
      * Prints a message to the console if the model is loaded successfully.
-     * Prints an error message and stack trace to the console if the model fails to load.
+     * Prints an error message and stack trace to the console if the model fails to
+     * load.
      */
     public void loadModel() {
         try {
@@ -53,7 +60,8 @@ public class ModelProcessor {
             // SavedModelBundle object. "serve" specifies the model signature name.
             bundle = SavedModelBundle.load(MODEL_PATH, "serve");
 
-            // Sets the session to a new Session object to run the TensorFlow model and make predictions
+            // Sets the session to a new Session object to run the TensorFlow model and make
+            // predictions
             session = bundle.session();
             System.out.println("Model loaded successfully");
         } catch (Exception e) {
@@ -86,7 +94,8 @@ public class ModelProcessor {
 
     /**
      * Returns the name of the output node of the TensorFlow model.
-     * The output node is determined by finding the first operation in the graph that contains the string "input" in its name,
+     * The output node is determined by finding the first operation in the graph
+     * that contains the string "input" in its name,
      * and then returning the name of the next operation in the graph.
      *
      * @return The name of the output node of the TensorFlow model.
@@ -110,16 +119,18 @@ public class ModelProcessor {
     }
 
     /**
-     * Reads all the lines from the file specified by LABELS_PATH and stores them in the labels list.
+     * Reads all the lines from the file specified by LABELS_PATH and stores them in
+     * the labels list.
      * Prints a success message and the labels list if the operation is successful.
      * Prints an error message and the stack trace if the operation fails.
      */
     public void loadLabels() {
         try {
-            // Read all the lines from the labels.txt file and returns them as a list of strings
+            // Read all the lines from the labels.txt file and returns them as a list of
+            // strings
             // Paths.get() creates a Path object representing the path to the labels file
             labels = Files.readAllLines(Paths.get(LABELS_PATH));
-            
+
             System.out.println("Labels loaded successfully");
             System.out.println("Labels: " + labels);
         } catch (IOException e) {
@@ -147,14 +158,31 @@ public class ModelProcessor {
     }
 
     /**
-     * Resizes the given Mat frame to the specified dimensions.
+     * Resizes the given Mat frame to the specified dimensions by converting to RGB,
+     * center-cropping to a square, and then resizing to 224x224.
      *
      * @param frame The original Mat frame.
-     * @return The resized Mat frame.
+     * @return The resized Mat frame in RGB format.
      */
     public Mat resizeFrame(Mat frame) {
+        // Convert from BGR (OpenCV default) to RGB format expected by the model
+        Mat rgbFrame = new Mat();
+        Imgproc.cvtColor(frame, rgbFrame, Imgproc.COLOR_BGR2RGB);
+
+        // Calculate center crop to maintain aspect ratio
+        int width = rgbFrame.cols();
+        int height = rgbFrame.rows();
+        int minDimension = Math.min(width, height);
+
+        int startX = (width - minDimension) / 2;
+        int startY = (height - minDimension) / 2;
+
+        org.opencv.core.Rect roi = new org.opencv.core.Rect(startX, startY, minDimension, minDimension);
+        Mat cropped = new Mat(rgbFrame, roi);
+
+        // Resize the cropped square to 224x224
         Mat resized = new Mat();
-        Imgproc.resize(frame, resized, new Size(224, 224)); // resize to 224x224
+        Imgproc.resize(cropped, resized, new Size(224, 224));
         return resized;
     }
 
@@ -203,7 +231,8 @@ public class ModelProcessor {
      * @return A Tensor representing the input data.
      */
     public Tensor<Float> floatArrayToTensor(float[] floatArray) {
-        long[] shape = {1, 224, 224, 3}; // assuming the model expects input shape as [batch_size, height, width, channels]
+        long[] shape = { 1, 224, 224, 3 }; // assuming the model expects input shape as [batch_size, height, width,
+                                           // channels]
         return Tensor.create(shape, FloatBuffer.wrap(floatArray));
     }
 

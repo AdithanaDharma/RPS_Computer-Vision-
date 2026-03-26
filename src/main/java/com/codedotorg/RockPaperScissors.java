@@ -108,45 +108,98 @@ public class RockPaperScissors {
     }
 
     /**
-     * Updates the game by getting the predicted class and score from
-     * the CameraController, showing the user's response and confidence
-     * score in the app, getting the computer's choice, getting the
-     * winner, and loading the game over screen if the game is over.
+     * Updates the game by preparing the Start button.
      */
     public void updateGame() {
-        timeline = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
-            // Get the predicted class and score from the CameraController
+        game.getReadyButton().setVisible(true);
+        game.getPromptLabel().setText("Click Start to begin!");
+        game.getReadyButton().setOnAction(event -> {
+            game.getReadyButton().setVisible(false);
+            startStabilityCheck();
+        });
+    }
+
+    private String candidateClass = null;
+    private long candidateStartTime = 0;
+    private float minConfidence = 0;
+    private float maxConfidence = 0;
+
+    /**
+     * Continuously checks the tracked gesture.
+     * To be valid, the user's gesture must remain the same, 
+     * the confidence score must be >= 70%, and it must not fluctuate 
+     * more than +- 7.5% (15% total) over a period of 3 seconds.
+     */
+    private void startStabilityCheck() {
+        candidateClass = null;
+        candidateStartTime = System.currentTimeMillis();
+        minConfidence = 0;
+        maxConfidence = 0;
+
+        timeline = new Timeline(new KeyFrame(Duration.millis(100), event -> {
             String predictedClass = cameraController.getPredictedClass();
-            double predictedScore = cameraController.getPredictedScore();
+            float score = cameraController.getPredictedScore();
+            long now = System.currentTimeMillis();
 
-            if (predictedClass != null) {
-                // Show the user's response and confidence score in the app
-                game.showUserResponse(predictedClass, predictedScore);
-
-                // Get the computer's choice
-                String computerChoice = logic.getComputerChoice();
-
-                // Get the winner
-                String winner = logic.determineWinner(predictedClass, computerChoice);
-                
-                if (logic.isGameOver()) {
-                    // Create a pause transition of 3 seconds
-                    PauseTransition pause = new PauseTransition(Duration.seconds(3));
-
-                    // Set the action to execute after the pause
-                    pause.setOnFinished(e -> loadGameOver(winner));
-
-                    // Start the pause transition
-                    pause.play();
+            if (predictedClass != null && !predictedClass.isEmpty()) {
+                String cleanPredictedClass = predictedClass;
+                if (cleanPredictedClass.contains(" ")) {
+                    cleanPredictedClass = cleanPredictedClass.substring(cleanPredictedClass.indexOf(" ") + 1);
                 }
+
+                if (score < 0.70f) {
+                    // Reset if confidence drops below 70%
+                    candidateClass = null;
+                    game.getPromptLabel().setText("Need more confidence (>70%)...");
+                } else {
+                    if (!cleanPredictedClass.equals(candidateClass)) {
+                        candidateClass = cleanPredictedClass;
+                        candidateStartTime = now;
+                        minConfidence = score;
+                        maxConfidence = score;
+                        game.getPromptLabel().setText("Hold steady... (" + candidateClass + ")");
+                    } else {
+                        minConfidence = Math.min(minConfidence, score);
+                        maxConfidence = Math.max(maxConfidence, score);
+                        
+                        if ((maxConfidence - minConfidence) > 0.15f) { // Fluctuation > 15% (+- 7.5%)
+                            candidateStartTime = now;
+                            minConfidence = score;
+                            maxConfidence = score;
+                            game.getPromptLabel().setText("Fluctuating! Hold steady...");
+                        } else {
+                            long elapsed = now - candidateStartTime;
+                            if (elapsed >= 2000) {
+                                timeline.stop();
+                                game.getPromptLabel().setText("Locked!");
+                                executeGameResult(predictedClass, score);
+                                return;
+                            } else {
+                                game.getPromptLabel().setText("Hold steady... " + String.format("%.1f", (2000 - elapsed) / 1000.0) + "s");
+                            }
+                        }
+                    }
+                }
+                game.showUserResponse(predictedClass, score);
             }
         }));
-
-        // Specify that the animation should repeat indefinitely
         timeline.setCycleCount(Timeline.INDEFINITE);
-
-        // Start the animation
         timeline.play();
+    }
+
+    /**
+     * Evaluates the game result against the computer choice and
+     * transitions to the GameOver scene.
+     */
+    private void executeGameResult(String predictedClass, double predictedScore) {
+        String computerChoice = logic.getComputerChoice();
+        String winner = logic.determineWinner(predictedClass, computerChoice);
+        
+        if (logic.isGameOver()) {
+            PauseTransition pause = new PauseTransition(Duration.seconds(3));
+            pause.setOnFinished(e -> loadGameOver(winner));
+            pause.play();
+        }
     }
 
     /**
